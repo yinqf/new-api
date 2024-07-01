@@ -147,7 +147,7 @@ func (a *Adaptor) DoResponse(c *gin.Context, resp *http.Response, info *relaycom
 		if info.IsStream {
 			err, usage = OaiStreamHandler(c, resp, info)
 		} else {
-			err, usage = OpenaiHandler(c, resp, info.PromptTokens, info.UpstreamModelName)
+			err, usage = OpenaiHandler(c, resp, info.PromptTokens, info.UpstreamModelName, info.SourceModelName)
 		}
 	}
 	return
