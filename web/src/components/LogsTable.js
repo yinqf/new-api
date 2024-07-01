@@ -366,8 +366,8 @@ const LogsTable = () => {
       title: '详情',
       dataIndex: 'content',
       render: (text, record, index) => {
-        let other = getLogOther(record.other);
-        if (other == null || record.type !== 2) {
+        // let other = getLogOther(record.other);
+        // if (other == null || record.type !== 2) {
           return (
             <Paragraph
               ellipsis={{
@@ -382,27 +382,27 @@ const LogsTable = () => {
               {text}
             </Paragraph>
           );
-        }
-        let content = renderModelPrice(
-          record.prompt_tokens,
-          record.completion_tokens,
-          other.model_ratio,
-          other.model_price,
-          other.completion_ratio,
-          other.group_ratio,
-        );
-        return (
-          <Tooltip content={content}>
-            <Paragraph
-              ellipsis={{
-                rows: 2,
-              }}
-              style={{ maxWidth: 240 }}
-            >
-              {text}
-            </Paragraph>
-          </Tooltip>
-        );
+        // }
+        // let content = renderModelPrice(
+        //   record.prompt_tokens,
+        //   record.completion_tokens,
+        //   other.model_ratio,
+        //   other.model_price,
+        //   other.completion_ratio,
+        //   other.group_ratio,
+        // );
+        // return (
+        //   <Tooltip content={content}>
+        //     <Paragraph
+        //       ellipsis={{
+        //         rows: 2,
+        //       }}
+        //       style={{ maxWidth: 240 }}
+        //     >
+        //       {text}
+        //     </Paragraph>
+        //   </Tooltip>
+        // );
       },
     },
   ];

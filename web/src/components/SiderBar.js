@@ -104,12 +104,12 @@ const SiderBar = () => {
         to: '/topup',
         icon: <IconCreditCard />,
       },
-      {
-        text: '模型价格',
-        itemKey: 'pricing',
-        to: '/pricing',
-        icon: <IconPriceTag />,
-      },
+      // {
+      //   text: '模型价格',
+      //   itemKey: 'pricing',
+      //   to: '/pricing',
+      //   icon: <IconPriceTag />,
+      // },
       {
         text: '用户管理',
         itemKey: 'user',

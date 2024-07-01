@@ -296,13 +296,16 @@ func GetCompletionRatio(name string) float64 {
 		name = "gpt-4-gizmo-*"
 	}
 	if strings.HasPrefix(name, "gpt-3.5") {
-		if name == "gpt-3.5-turbo" || strings.HasSuffix(name, "0125") {
+		if name == "gpt-3.5-turbo" || strings.HasSuffix(name, "0125") || strings.HasSuffix(name, "1107") {
 			// https://openai.com/blog/new-embedding-models-and-api-updates
 			// Updated GPT-3.5 Turbo model and lower pricing
 			return 3
 		}
 		if strings.HasSuffix(name, "1106") {
 			return 2
+		}
+		if strings.HasSuffix(name, "logprobs") {
+			return 6
 		}
 		return 4.0 / 3.0
 	}
