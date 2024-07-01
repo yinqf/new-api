@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
+	"github.com/iancoleman/orderedmap"
 	"io"
 	"net/http"
 	"one-api/common"
@@ -52,6 +53,25 @@ func OpenaiStreamHandler(c *gin.Context, resp *http.Response, info *relaycommon.
 			if data[:6] != "data: " && data[:6] != "[DONE]" {
 				continue
 			}
+
+			// 模型名称不一致，存在模型映射转换
+			if info.SourceModelName != info.UpstreamModelName && data[:6] == "data: " {
+				jsonStr := data[6:]
+				oMap := orderedmap.New()
+				err := oMap.UnmarshalJSON([]byte(jsonStr))
+				if err != nil {
+					common.LogError(c, "模型还原，json解析失败："+err.Error())
+				} else {
+					oMap.Set("model", info.SourceModelName)
+					modifiedJSON, err := json.Marshal(oMap)
+					if err != nil {
+						common.LogError(c, "模型还原，json组装失败："+err.Error())
+					} else {
+						data = "data: " + string(modifiedJSON)
+					}
+				}
+			}
+
 			if !common.SafeSendStringTimeout(dataChan, data, constant.StreamingTimeout) {
 				// send data timeout, stop the stream
 				common.LogError(c, "send data timeout, stop the stream")
@@ -159,7 +179,7 @@ func OpenaiStreamHandler(c *gin.Context, resp *http.Response, info *relaycommon.
 	return nil, responseTextBuilder.String(), toolCount
 }
 
-func OpenaiHandler(c *gin.Context, resp *http.Response, promptTokens int, model string) (*dto.OpenAIErrorWithStatusCode, *dto.Usage) {
+func OpenaiHandler(c *gin.Context, resp *http.Response, promptTokens int, model string, sourceModel string) (*dto.OpenAIErrorWithStatusCode, *dto.Usage) {
 	var simpleResponse dto.SimpleResponse
 	responseBody, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -179,6 +199,24 @@ func OpenaiHandler(c *gin.Context, resp *http.Response, promptTokens int, model 
 			StatusCode: resp.StatusCode,
 		}, nil
 	}
+
+	// 模型名称不一致，存在模型映射转换
+	if sourceModel != model {
+		oMap := orderedmap.New()
+		err := oMap.UnmarshalJSON(responseBody)
+		if err != nil {
+			common.LogError(c, "模型还原，json解析失败："+err.Error())
+		} else {
+			oMap.Set("model", sourceModel)
+			modifiedJSON, err := json.MarshalIndent(oMap, "", "    ")
+			if err != nil {
+				common.LogError(c, "模型还原，json组装失败："+err.Error())
+			} else {
+				responseBody = modifiedJSON
+			}
+		}
+	}
+
 	// Reset response body
 	resp.Body = io.NopCloser(bytes.NewBuffer(responseBody))
 	// We shouldn't set the header before we parse the response body, because the parse part may fail.

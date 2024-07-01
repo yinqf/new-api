@@ -49,7 +49,7 @@ func (a *Adaptor) DoResponse(c *gin.Context, resp *http.Response, info *relaycom
 		err, responseText, _ = openai.OpenaiStreamHandler(c, resp, info)
 		usage, _ = service.ResponseText2Usage(responseText, info.UpstreamModelName, info.PromptTokens)
 	} else {
-		err, usage = openai.OpenaiHandler(c, resp, info.PromptTokens, info.UpstreamModelName)
+		err, usage = openai.OpenaiHandler(c, resp, info.PromptTokens, info.UpstreamModelName, info.SourceModelName)
 	}
 	return
 }
