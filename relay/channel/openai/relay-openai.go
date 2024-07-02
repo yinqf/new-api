@@ -55,7 +55,7 @@ func OpenaiStreamHandler(c *gin.Context, resp *http.Response, info *relaycommon.
 			}
 
 			// 模型名称不一致，存在模型映射转换
-			if info.SourceModelName != info.UpstreamModelName && data[:6] == "data: " {
+			if info.SourceModelName != info.UpstreamModelName && data[:6] == "data: " && !strings.HasPrefix(data[6:], "[DONE]") {
 				jsonStr := data[6:]
 				oMap := orderedmap.New()
 				err := oMap.UnmarshalJSON([]byte(jsonStr))
@@ -224,7 +224,9 @@ func OpenaiHandler(c *gin.Context, resp *http.Response, promptTokens int, model 
 	// So the httpClient will be confused by the response.
 	// For example, Postman will report error, and we cannot check the response at all.
 	for k, v := range resp.Header {
-		c.Writer.Header().Set(k, v[0])
+		if !strings.EqualFold(k, "Content-Length") {
+			c.Writer.Header().Set(k, v[0])
+		}
 	}
 	c.Writer.WriteHeader(resp.StatusCode)
 	_, err = io.Copy(c.Writer, resp.Body)
