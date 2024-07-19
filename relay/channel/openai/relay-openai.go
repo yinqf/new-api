@@ -66,6 +66,7 @@ func OaiStreamHandler(c *gin.Context, resp *http.Response, info *relaycommon.Rel
 						common.LogError(c, "streaming error: "+err.Error())
 					}
 				}
+				data = common.ReplaceModelForStream(c, info.SourceModelName, info.UpstreamModelName, data)
 				lastStreamData = data
 				streamItems = append(streamItems, data)
 			}
@@ -216,6 +217,8 @@ func OpenaiHandler(c *gin.Context, resp *http.Response, promptTokens int, model 
 			StatusCode: resp.StatusCode,
 		}, nil
 	}
+
+	responseBody = common.ReplaceModelForNoStream(c, sourceModel, model, responseBody)
 	// Reset response body
 	resp.Body = io.NopCloser(bytes.NewBuffer(responseBody))
 	// We shouldn't set the header before we parse the response body, because the parse part may fail.
@@ -223,7 +226,9 @@ func OpenaiHandler(c *gin.Context, resp *http.Response, promptTokens int, model 
 	// So the httpClient will be confused by the response.
 	// For example, Postman will report error, and we cannot check the response at all.
 	for k, v := range resp.Header {
-		c.Writer.Header().Set(k, v[0])
+		if !strings.EqualFold(k, "Content-Length") {
+			c.Writer.Header().Set(k, v[0])
+		}
 	}
 	c.Writer.WriteHeader(resp.StatusCode)
 	_, err = io.Copy(c.Writer, resp.Body)
