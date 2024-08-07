@@ -34,7 +34,7 @@ type RelayInfo struct {
 }
 
 func GenRelayInfo(c *gin.Context) *RelayInfo {
-	channelType := c.GetInt("channel")
+	channelType := c.GetInt("channel_type")
 	channelId := c.GetInt("channel_id")
 
 	tokenId := c.GetInt("token_id")
@@ -113,7 +113,7 @@ type TaskRelayInfo struct {
 }
 
 func GenTaskRelayInfo(c *gin.Context) *TaskRelayInfo {
-	channelType := c.GetInt("channel")
+	channelType := c.GetInt("channel_type")
 	channelId := c.GetInt("channel_id")
 
 	tokenId := c.GetInt("token_id")
